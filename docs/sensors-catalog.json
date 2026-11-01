@@ -1,0 +1,440 @@
+{
+  "total_sensors": 23,
+  "biometric_sensors": [
+    "BTEMP-01",
+    "HR-01",
+    "SPO2-01"
+  ],
+  "devices": [
+    {
+      "device_id": "ESP32-01",
+      "sensor_count": 13,
+      "groups": [
+        "domo_ambiental",
+        "domo_suelo"
+      ],
+      "sensors": [
+        {
+          "sensor_id": "TEMP-01",
+          "variable": "temperatura_aire",
+          "nombre": "Temperatura del Aire",
+          "unit": "C",
+          "group": "domo_ambiental",
+          "description": "Temperatura ambiental de la planta dentro del domo",
+          "hardware": "DS18B20 / TMP117 (confirmar con equipo de hardware)",
+          "biometrico": false,
+          "value_min": 15.0,
+          "value_max": 35.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 15.0,
+            "valor_max": 35.0
+          }
+        },
+        {
+          "sensor_id": "HUM-01",
+          "variable": "humedad_aire",
+          "nombre": "Humedad del Aire",
+          "unit": "%",
+          "group": "domo_ambiental",
+          "description": "Humedad relativa del aire dentro del domo",
+          "hardware": "DHT22 / SHT31 (confirmar con equipo de hardware)",
+          "biometrico": false,
+          "value_min": 40.0,
+          "value_max": 85.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 40.0,
+            "valor_max": 85.0
+          }
+        },
+        {
+          "sensor_id": "CO2-01",
+          "variable": "concentracion_co2",
+          "nombre": "Concentracion de Gas (CO2)",
+          "unit": "ppm",
+          "group": "domo_ambiental",
+          "description": "Concentracion de CO2 / calidad del aire del domo",
+          "hardware": "MH-Z19 (confirmar con equipo de hardware)",
+          "biometrico": false,
+          "value_min": 400.0,
+          "value_max": 1200.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 400.0,
+            "valor_max": 1200.0
+          }
+        },
+        {
+          "sensor_id": "LUX-01",
+          "variable": "luz_ambiental",
+          "nombre": "Iluminacion (lux)",
+          "unit": "lux",
+          "group": "domo_ambiental",
+          "description": "Luz visible + infrarrojo. NO es indice UV.",
+          "hardware": "TSL2591",
+          "biometrico": false,
+          "value_min": 100.0,
+          "value_max": 3000.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 100.0,
+            "valor_max": 3000.0
+          }
+        },
+        {
+          "sensor_id": "SOIL-HUM-01",
+          "variable": "humedad_suelo_1",
+          "nombre": "Humedad del Suelo S1",
+          "unit": "%",
+          "group": "domo_suelo",
+          "description": "Humedad del suelo en la zona 1",
+          "hardware": "STEMMA Soil Sensor",
+          "biometrico": false,
+          "value_min": 20.0,
+          "value_max": 70.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 20.0,
+            "valor_max": 70.0
+          }
+        },
+        {
+          "sensor_id": "SOIL-HUM-02",
+          "variable": "humedad_suelo_2",
+          "nombre": "Humedad del Suelo S2",
+          "unit": "%",
+          "group": "domo_suelo",
+          "description": "Humedad del suelo en la zona 2",
+          "hardware": "STEMMA Soil Sensor",
+          "biometrico": false,
+          "value_min": 20.0,
+          "value_max": 70.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 20.0,
+            "valor_max": 70.0
+          }
+        },
+        {
+          "sensor_id": "SOIL-HUM-03",
+          "variable": "humedad_suelo_3",
+          "nombre": "Humedad del Suelo S3",
+          "unit": "%",
+          "group": "domo_suelo",
+          "description": "Humedad del suelo en la zona 3",
+          "hardware": "STEMMA Soil Sensor",
+          "biometrico": false,
+          "value_min": 20.0,
+          "value_max": 70.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 20.0,
+            "valor_max": 70.0
+          }
+        },
+        {
+          "sensor_id": "SOIL-TEMP-01",
+          "variable": "temperatura_suelo_1",
+          "nombre": "Temperatura del Suelo S1",
+          "unit": "C",
+          "group": "domo_suelo",
+          "description": "Temperatura del suelo en la zona 1 (misma lectura fisica que SOIL-HUM-01)",
+          "hardware": "STEMMA Soil Sensor",
+          "biometrico": false,
+          "value_min": 15.0,
+          "value_max": 30.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 15.0,
+            "valor_max": 30.0
+          }
+        },
+        {
+          "sensor_id": "SOIL-TEMP-02",
+          "variable": "temperatura_suelo_2",
+          "nombre": "Temperatura del Suelo S2",
+          "unit": "C",
+          "group": "domo_suelo",
+          "description": "Temperatura del suelo en la zona 2 (misma lectura fisica que SOIL-HUM-02)",
+          "hardware": "STEMMA Soil Sensor",
+          "biometrico": false,
+          "value_min": 15.0,
+          "value_max": 30.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 15.0,
+            "valor_max": 30.0
+          }
+        },
+        {
+          "sensor_id": "SOIL-TEMP-03",
+          "variable": "temperatura_suelo_3",
+          "nombre": "Temperatura del Suelo S3",
+          "unit": "C",
+          "group": "domo_suelo",
+          "description": "Temperatura del suelo en la zona 3 (misma lectura fisica que SOIL-HUM-03)",
+          "hardware": "STEMMA Soil Sensor",
+          "biometrico": false,
+          "value_min": 15.0,
+          "value_max": 30.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 15.0,
+            "valor_max": 30.0
+          }
+        },
+        {
+          "sensor_id": "NPK-N-01",
+          "variable": "nitrogeno_suelo",
+          "nombre": "Nitrogeno (N)",
+          "unit": "mg/kg",
+          "group": "domo_suelo",
+          "description": "Nitrogeno disponible en el suelo — SIMULADO, sin sensor fisico",
+          "hardware": "simulado",
+          "biometrico": false,
+          "value_min": 50.0,
+          "value_max": 300.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 50.0,
+            "valor_max": 300.0
+          }
+        },
+        {
+          "sensor_id": "NPK-P-01",
+          "variable": "fosforo_suelo",
+          "nombre": "Fosforo (P)",
+          "unit": "mg/kg",
+          "group": "domo_suelo",
+          "description": "Fosforo disponible en el suelo — SIMULADO, sin sensor fisico",
+          "hardware": "simulado",
+          "biometrico": false,
+          "value_min": 20.0,
+          "value_max": 150.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 20.0,
+            "valor_max": 150.0
+          }
+        },
+        {
+          "sensor_id": "NPK-K-01",
+          "variable": "potasio_suelo",
+          "nombre": "Potasio (K)",
+          "unit": "mg/kg",
+          "group": "domo_suelo",
+          "description": "Potasio disponible en el suelo — SIMULADO, sin sensor fisico",
+          "hardware": "simulado",
+          "biometrico": false,
+          "value_min": 100.0,
+          "value_max": 400.0,
+          "device_id": "ESP32-01",
+          "threshold": {
+            "valor_min": 100.0,
+            "valor_max": 400.0
+          }
+        }
+      ]
+    },
+    {
+      "device_id": "EVA-01",
+      "sensor_count": 10,
+      "groups": [
+        "bio",
+        "eva",
+        "imu"
+      ],
+      "sensors": [
+        {
+          "sensor_id": "HR-01",
+          "variable": "pulso_cardiaco",
+          "nombre": "Pulso Cardiaco",
+          "unit": "bpm",
+          "group": "bio",
+          "description": "Frecuencia cardiaca del tripulante",
+          "hardware": "MAX30102 / sensor de pulso (confirmar)",
+          "biometrico": true,
+          "value_min": 55.0,
+          "value_max": 140.0,
+          "device_id": "EVA-01",
+          "threshold": {
+            "valor_min": 55.0,
+            "valor_max": 140.0
+          }
+        },
+        {
+          "sensor_id": "SPO2-01",
+          "variable": "saturacion_oxigeno",
+          "nombre": "Saturacion de Oxigeno (SpO2)",
+          "unit": "%",
+          "group": "bio",
+          "description": "Saturacion de oxigeno en sangre",
+          "hardware": "MAX30102 (confirmar)",
+          "biometrico": true,
+          "value_min": 92.0,
+          "value_max": 100.0,
+          "device_id": "EVA-01",
+          "threshold": {
+            "valor_min": 92.0,
+            "valor_max": 100.0
+          }
+        },
+        {
+          "sensor_id": "BTEMP-01",
+          "variable": "temperatura_corporal",
+          "nombre": "Temperatura Corporal",
+          "unit": "C",
+          "group": "bio",
+          "description": "Temperatura corporal del tripulante",
+          "hardware": "sensor de temperatura corporal (confirmar)",
+          "biometrico": true,
+          "value_min": 34.5,
+          "value_max": 37.5,
+          "device_id": "EVA-01",
+          "threshold": {
+            "valor_min": 34.5,
+            "valor_max": 37.5
+          }
+        },
+        {
+          "sensor_id": "EVA-TEMP-01",
+          "variable": "temperatura_traje",
+          "nombre": "Temperatura del Traje",
+          "unit": "C",
+          "group": "eva",
+          "description": "Temperatura dentro del traje de soporte de vida",
+          "hardware": "DS18B20 / TMP117 (confirmar)",
+          "biometrico": false,
+          "value_min": 15.0,
+          "value_max": 35.0,
+          "device_id": "EVA-01",
+          "threshold": {
+            "valor_min": 15.0,
+            "valor_max": 35.0
+          }
+        },
+        {
+          "sensor_id": "EVA-HUM-01",
+          "variable": "humedad_traje",
+          "nombre": "Humedad del Traje",
+          "unit": "%",
+          "group": "eva",
+          "description": "Humedad dentro del traje de soporte de vida",
+          "hardware": "DHT22 / SHT31 (confirmar)",
+          "biometrico": false,
+          "value_min": 30.0,
+          "value_max": 70.0,
+          "device_id": "EVA-01",
+          "threshold": {
+            "valor_min": 30.0,
+            "valor_max": 70.0
+          }
+        },
+        {
+          "sensor_id": "EVA-PRESS-01",
+          "variable": "presion_traje",
+          "nombre": "Presion del Traje",
+          "unit": "hPa",
+          "group": "eva",
+          "description": "Presion atmosferica dentro de la mochila EVA",
+          "hardware": "BMP280 / MS5611 (confirmar)",
+          "biometrico": false,
+          "value_min": 950.0,
+          "value_max": 1030.0,
+          "device_id": "EVA-01",
+          "threshold": {
+            "valor_min": 950.0,
+            "valor_max": 1030.0
+          }
+        },
+        {
+          "sensor_id": "ACC-X-01",
+          "variable": "aceleracion_x",
+          "nombre": "Aceleracion X",
+          "unit": "m/s²",
+          "group": "imu",
+          "description": "Aceleracion lineal en eje X (BNO055 compensada)",
+          "hardware": "BNO055",
+          "biometrico": false,
+          "value_min": -3.0,
+          "value_max": 3.0,
+          "device_id": "EVA-01",
+          "threshold": null
+        },
+        {
+          "sensor_id": "ACC-Y-01",
+          "variable": "aceleracion_y",
+          "nombre": "Aceleracion Y",
+          "unit": "m/s²",
+          "group": "imu",
+          "description": "Aceleracion lineal en eje Y (BNO055 compensada)",
+          "hardware": "BNO055",
+          "biometrico": false,
+          "value_min": -3.0,
+          "value_max": 3.0,
+          "device_id": "EVA-01",
+          "threshold": null
+        },
+        {
+          "sensor_id": "ACC-Z-01",
+          "variable": "aceleracion_z",
+          "nombre": "Aceleracion Z",
+          "unit": "m/s²",
+          "group": "imu",
+          "description": "Aceleracion lineal en eje Z (BNO055 compensada)",
+          "hardware": "BNO055",
+          "biometrico": false,
+          "value_min": -3.0,
+          "value_max": 3.0,
+          "device_id": "EVA-01",
+          "threshold": null
+        },
+        {
+          "sensor_id": "ACTIVITY-01",
+          "variable": "actividad",
+          "nombre": "Estado de Actividad",
+          "unit": "código",
+          "group": "imu",
+          "description": "Estado de actividad del BNO055 (0=Still, 1=Walking, 2=Running, 3=Tilting)",
+          "hardware": "BNO055",
+          "biometrico": false,
+          "value_min": 0,
+          "value_max": 3,
+          "device_id": "EVA-01",
+          "threshold": null
+        }
+      ]
+    }
+  ],
+  "contract": {
+    "reading": {
+      "device_id": "string",
+      "sensor_id": "string",
+      "timestamp": "ISO-8601 UTC",
+      "value": "number",
+      "unit": "string",
+      "sequence": "int (incremental por sensor)"
+    },
+    "buffer": {
+      "device_id": "string",
+      "buffer_id": "string unico del envio",
+      "sent_at": "ISO-8601 UTC",
+      "readings": "array de readings (contrato de arriba)"
+    },
+    "ack": {
+      "type": "ack",
+      "device_id": "string",
+      "buffer_id": "string",
+      "received_at": "ISO-8601 UTC",
+      "accepted": "int",
+      "rejected": "int",
+      "items": "array de {sensor_id, sequence, status, received_at, db_id, error?}"
+    },
+    "mqtt": {
+      "buffer_topic": "atabey/{device_id}/buffer",
+      "ack_topic": "atabey/ack/{device_id}",
+      "reading_topic": "atabey/{group}/{sensor_id}"
+    }
+  }
+}

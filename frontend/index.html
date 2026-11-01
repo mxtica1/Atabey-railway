@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Misión Atabey — Control de Misión</title>
+    <!-- Inter: UI labels, navigation, prose -->
+    <!-- IBM Plex Mono: sensor values, timestamps -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Configuracion en runtime: permite cambiar la URL del backend en un
+         sitio ya desplegado sin recompilar. Debe cargarse antes del bundle. -->
+    <script src="/runtime-config.js"></script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -218,7 +218,7 @@ def ingest_batch(batch: ReadingBatch) -> BatchAck:
         "items": [item.model_dump(mode="json") for item in items],
     })
 
-    return BatchAck(
+    ack = BatchAck(
         device_id=batch.device_id,
         buffer_id=batch.buffer_id,
         received_at=received_at,
@@ -227,6 +227,18 @@ def ingest_batch(batch: ReadingBatch) -> BatchAck:
         duplicates=0,
         items=items,
     )
+    
+    # Registrar ACK en auditoría
+    db.insert_ingest_ack(
+        device_id=batch.device_id,
+        buffer_id=batch.buffer_id,
+        total_items=len(batch.readings),
+        accepted=len(items),
+        rejected=0,
+        duplicates=0,
+    )
+    
+    return ack
 
 
 def publish_ack(ack: BatchAck) -> None:

@@ -232,6 +232,37 @@ def create_table() -> None:
             END IF;
         END$$;
     """
+    # Tablas de auditoría (Prompt 14): historico de ACKs y cambios de configuracion
+    sql_ingest_ack_audit = """
+        CREATE TABLE IF NOT EXISTS ingest_ack_audit (
+            id          SERIAL PRIMARY KEY,
+            device_id   TEXT             NOT NULL,
+            buffer_id   TEXT             NOT NULL UNIQUE,
+            received_at TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
+            total_items INTEGER          NOT NULL,
+            accepted    INTEGER          NOT NULL,
+            rejected    INTEGER          NOT NULL,
+            duplicates  INTEGER          NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_ingest_ack_device_ts
+            ON ingest_ack_audit (device_id, received_at DESC);
+    """
+    sql_audit_log = """
+        CREATE TABLE IF NOT EXISTS audit_log (
+            id          SERIAL PRIMARY KEY,
+            entity      TEXT             NOT NULL,
+            action      TEXT             NOT NULL,
+            entity_id   TEXT             NOT NULL,
+            old_value   TEXT,
+            new_value   TEXT,
+            changed_by  TEXT,
+            changed_at  TIMESTAMPTZ      NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_audit_log_entity_ts
+            ON audit_log (entity, changed_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_audit_log_entity_id
+            ON audit_log (entity_id);
+    """
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(sql_readings)
@@ -245,6 +276,8 @@ def create_table() -> None:
             cur.execute(sql_locations)
             cur.execute(sql_migrate_locations_sexo)
             cur.execute(sql_migrate_readings_ingest)
+            cur.execute(sql_ingest_ack_audit)
+            cur.execute(sql_audit_log)
         conn.commit()
     logger.info("Tablas verificadas/creadas.")
 
@@ -726,4 +759,146 @@ def get_tripulantes_meta() -> list:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(sql)
             rows = cur.fetchall()
+    return [dict(r) for r in rows]
+
+
+# ── Auditoría: ACK de Buffers ─────────────────────────────────────────────────
+
+def insert_ingest_ack(
+    device_id: str,
+    buffer_id: str,
+    total_items: int,
+    accepted: int,
+    rejected: int,
+    duplicates: int,
+) -> dict:
+    """
+    Registra un ACK de ingesta en la tabla de auditoría.
+    Se llama desde mqtt_client.ingest_batch() tras procesar un buffer exitosamente.
+    """
+    sql = """
+        INSERT INTO ingest_ack_audit (device_id, buffer_id, total_items, accepted, rejected, duplicates)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        RETURNING id, device_id, buffer_id, received_at, total_items, accepted, rejected, duplicates
+    """
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(sql, (device_id, buffer_id, total_items, accepted, rejected, duplicates))
+            row = cur.fetchone()
+        conn.commit()
+    logger.info("ACK auditado: buffer_id=%s device_id=%s (aceptadas=%d duplicadas=%d rechazadas=%d)",
+                buffer_id, device_id, accepted, duplicates, rejected)
+    return dict(row) if row else {}
+
+
+def get_ingest_acks(device_id: Optional[str] = None, limit: int = 100) -> list:
+    """
+    Devuelve el histórico de ACKs de buffers (últimos `limit`).
+    Si device_id es especificado, filtra solo para ese dispositivo.
+    """
+    if device_id:
+        sql = """
+            SELECT id, device_id, buffer_id, received_at, total_items, accepted, rejected, duplicates
+            FROM ingest_ack_audit
+            WHERE device_id = %s
+            ORDER BY received_at DESC
+            LIMIT %s
+        """
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(sql, (device_id, limit))
+                rows = cur.fetchall()
+    else:
+        sql = """
+            SELECT id, device_id, buffer_id, received_at, total_items, accepted, rejected, duplicates
+            FROM ingest_ack_audit
+            ORDER BY received_at DESC
+            LIMIT %s
+        """
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(sql, (limit,))
+                rows = cur.fetchall()
+    return [dict(r) for r in rows]
+
+
+# ── Auditoría: Cambios de Configuración ──────────────────────────────────────
+
+def insert_audit_log(
+    entity: str,
+    action: str,
+    entity_id: str,
+    old_value: Optional[str] = None,
+    new_value: Optional[str] = None,
+    changed_by: Optional[str] = None,
+) -> dict:
+    """
+    Registra un cambio en la tabla de auditoría.
+    
+    entity: 'umbral', 'alerta', 'usuario', etc.
+    action: 'create', 'update', 'delete', 'resolve', etc.
+    entity_id: identificador de la entidad (sensor_id, alert_id, user_id, etc.)
+    old_value: valor anterior (JSON serializado si es un objeto)
+    new_value: valor nuevo (JSON serializado si es un objeto)
+    changed_by: usuario que realizó el cambio
+    """
+    sql = """
+        INSERT INTO audit_log (entity, action, entity_id, old_value, new_value, changed_by)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        RETURNING id, entity, action, entity_id, old_value, new_value, changed_by, changed_at
+    """
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(sql, (entity, action, entity_id, old_value, new_value, changed_by))
+            row = cur.fetchone()
+        conn.commit()
+    logger.info("Auditoría registrada: %s %s %s (changed_by=%s)", entity, action, entity_id, changed_by)
+    return dict(row) if row else {}
+
+
+def get_audit_log(
+    entity: Optional[str] = None,
+    entity_id: Optional[str] = None,
+    limit: int = 100,
+) -> list:
+    """
+    Devuelve el histórico de auditoría (últimos `limit` cambios).
+    Si entity es especificado, filtra solo cambios de ese tipo de entidad.
+    Si entity_id es especificado, filtra solo cambios a esa entidad.
+    """
+    if entity and entity_id:
+        sql = """
+            SELECT id, entity, action, entity_id, old_value, new_value, changed_by, changed_at
+            FROM audit_log
+            WHERE entity = %s AND entity_id = %s
+            ORDER BY changed_at DESC
+            LIMIT %s
+        """
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(sql, (entity, entity_id, limit))
+                rows = cur.fetchall()
+    elif entity:
+        sql = """
+            SELECT id, entity, action, entity_id, old_value, new_value, changed_by, changed_at
+            FROM audit_log
+            WHERE entity = %s
+            ORDER BY changed_at DESC
+            LIMIT %s
+        """
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(sql, (entity, limit))
+                rows = cur.fetchall()
+    else:
+        sql = """
+            SELECT id, entity, action, entity_id, old_value, new_value, changed_by, changed_at
+            FROM audit_log
+            ORDER BY changed_at DESC
+            LIMIT %s
+        """
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(sql, (limit,))
+                rows = cur.fetchall()
     return [dict(r) for r in rows]

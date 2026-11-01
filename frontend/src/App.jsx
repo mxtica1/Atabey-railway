@@ -21,20 +21,35 @@ function App() {
   // se entra directo con el rol por defecto (modo pruebas con sensores).
   useEffect(() => {
     let cancelled = false
-    fetch(apiUrl('/auth/mode'))
-      .then(r => r.ok ? r.json() : null)
-      .then(mode => {
+    
+    const fetchAuthMode = async () => {
+      try {
+        const response = await fetch(apiUrl('/auth/mode'), {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin'
+        })
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+        
+        const mode = await response.json()
         if (cancelled) return
+        
         if (mode && mode.requires_login === false) {
           setAuth({ token: '', username: mode.default_username, rol: mode.default_rol })
         }
         setAuthMode(mode ?? { requires_login: true, default_rol: 'observador', default_username: 'anonimo' })
-      })
-      .catch(() => {
+      } catch (err) {
         if (cancelled) return
+        console.error('Error fetching auth mode:', err)
         // Sin backend no se puede saber el modo: se pide login.
         setAuthMode({ requires_login: true, default_rol: 'observador', default_username: 'anonimo' })
-      })
+      }
+    }
+    
+    fetchAuthMode()
     return () => { cancelled = true }
   }, [])
 

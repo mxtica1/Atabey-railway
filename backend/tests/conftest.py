@@ -46,6 +46,10 @@ def mock_db():
         patch("backend.db.get_active_alert", return_value=None) as mock_active_alert,
         patch("backend.db.get_alert_by_id", return_value=None) as mock_alert_by_id,
         patch("backend.db.get_latest_location", return_value=None) as mock_location,
+        patch("backend.db.insert_ingest_ack", return_value={}) as mock_insert_ack,
+        patch("backend.db.get_ingest_acks", return_value=[]) as mock_get_acks,
+        patch("backend.db.insert_audit_log", return_value={}) as mock_insert_audit,
+        patch("backend.db.get_audit_log", return_value=[]) as mock_get_audit,
     ):
         yield {
             "insert": mock_insert,
@@ -55,6 +59,10 @@ def mock_db():
             "active_alert": mock_active_alert,
             "alert_by_id": mock_alert_by_id,
             "location": mock_location,
+            "insert_ack": mock_insert_ack,
+            "get_acks": mock_get_acks,
+            "insert_audit": mock_insert_audit,
+            "get_audit": mock_get_audit,
         }
 
 

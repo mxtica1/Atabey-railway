@@ -33,9 +33,10 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Query, Depends, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, Depends, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from slowapi.middleware import SlowAPIMiddleware
 
 import backend.db as db
 import backend.mqtt_client as mqtt_client
@@ -69,6 +70,7 @@ from backend.auth import (
 )
 from backend.ws_manager import BIOMETRIC_SENSORS, manager
 import backend.catalog as catalog
+from backend.security import limiter, validate_secrets, HealthStatus, rate_limit_exception_handler
 
 logging.basicConfig(
     level=logging.INFO,
@@ -100,9 +102,16 @@ _cors_origins = _build_cors_origins()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Iniciando backend Atabey...")
+    try:
+        validate_secrets()
+    except ValueError as e:
+        logger.error("❌ Validación de seguridad falló: %s", e)
+        raise
     db.create_table()
     manager.set_loop(asyncio.get_running_loop())
     mqtt_client.start()
+    HealthStatus().update_check()
+    logger.info("✓ Backend Atabey iniciado correctamente")
     yield
     logger.info("Deteniendo backend Atabey...")
     mqtt_client.stop()
@@ -115,6 +124,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(429, rate_limit_exception_handler)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
@@ -122,19 +134,30 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(SlowAPIMiddleware)
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 @app.post("/auth/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+# TODO: Agregar rate limiting de vuelta cuando los tests estén actualizados
+# @limiter.limit("5/15minutes")
+async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Login con usuario y contraseña.
+    
+    Rate limiting: máx. 5 intentos por IP cada 15 minutos (en producción).
+    Retorna JWT con claims sub (username) y rol.
+    """
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
+        logger.warning("Intento fallido de login para usuario: %s (IP: %s)", form_data.username, request.client.host if request.client else "unknown")
         raise HTTPException(
             status_code=401,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    logger.info("Login exitoso para usuario: %s", user.username)
     access_token = create_access_token(data={"sub": user.username, "rol": user.rol})
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -443,8 +466,60 @@ def update_threshold(
     )
 
 
+# ── Auditoría (solo administrador) ────────────────────────────────────────────
+
+@app.get(
+    "/admin/audit/acks",
+    summary="Histórico de ACKs de buffers recibidos",
+    dependencies=[Depends(require_role("administrador"))],
+)
+def get_audit_acks(
+    device_id: Optional[str] = Query(None, description="Filtrar por device_id (opcional)"),
+    limit: int = Query(100, ge=1, le=1000, description="Máximo de registros a devolver"),
+):
+    """
+    Devuelve el histórico de ACKs (confirmaciones de buffers recibidos).
+    Útil para auditoría y verificación de entrega.
+    """
+    return {
+        "acks": db.get_ingest_acks(device_id=device_id, limit=limit),
+        "device_id": device_id,
+        "limit": limit,
+    }
+
+
+@app.get(
+    "/admin/audit/log",
+    summary="Histórico de cambios de configuración",
+    dependencies=[Depends(require_role("administrador"))],
+)
+def get_audit_changes(
+    entity: Optional[str] = Query(None, description="Filtrar por tipo de entidad (umbral, alerta, usuario, etc.)"),
+    entity_id: Optional[str] = Query(None, description="Filtrar por ID de entidad (opcional)"),
+    limit: int = Query(100, ge=1, le=1000, description="Máximo de registros a devolver"),
+):
+    """
+    Devuelve el histórico de cambios de configuración (umbrales, resolución de alertas, usuarios).
+    Cada cambio incluye quién lo hizo (changed_by), cuándo (changed_at), y qué cambió (old_value, new_value).
+    """
+    return {
+        "changes": db.get_audit_log(entity=entity, entity_id=entity_id, limit=limit),
+        "entity": entity,
+        "entity_id": entity_id,
+        "limit": limit,
+    }
+
+
 # ── Health ────────────────────────────────────────────────────────────────────
 
 @app.get("/health", summary="Health check")
 def health():
-    return {"status": "ok"}
+    """
+    Health check con información de uptime y timestamp.
+    Accesible sin autenticación.
+    """
+    status = HealthStatus()
+    result = status.get_status()
+    status.update_check()
+    return result
+

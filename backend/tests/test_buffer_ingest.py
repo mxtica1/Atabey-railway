@@ -127,6 +127,7 @@ def test_ingest_batch_devuelve_ack_por_lectura():
         patch("backend.db.get_buffer_readings", return_value=[]),
         patch("backend.db.insert_reading_batch") as mock_insert,
         patch("backend.db.get_threshold", return_value=None),
+        patch("backend.db.insert_ingest_ack") as mock_insert_ack,
     ):
         mock_insert.side_effect = lambda readings, buffer_id=None: _fake_rows(readings, buffer_id)
         ack = mqtt_client.ingest_batch(batch)
@@ -162,6 +163,7 @@ def test_ingest_batch_es_idempotente():
     with (
         patch("backend.db.get_buffer_readings", return_value=ya_guardadas),
         patch("backend.db.insert_reading_batch") as mock_insert,
+        patch("backend.db.insert_ingest_ack") as mock_insert_ack,
     ):
         ack = mqtt_client.ingest_batch(batch)
 
@@ -187,6 +189,7 @@ def test_ingest_batch_evalua_umbrales():
         patch("backend.db.get_threshold", return_value=threshold),
         patch("backend.db.get_active_alert", return_value=None),
         patch("backend.db.insert_alert") as mock_alert,
+        patch("backend.db.insert_ingest_ack") as mock_insert_ack,
     ):
         mock_insert.side_effect = lambda readings, buffer_id=None: _fake_rows(readings, buffer_id)
         mock_alert.return_value = {"id": 55, "severidad": "critico"}
@@ -211,6 +214,7 @@ def test_ingest_batch_no_alerta_si_dentro_de_rango():
         patch("backend.db.get_threshold", return_value=threshold),
         patch("backend.db.get_active_alert", return_value=None),
         patch("backend.db.insert_alert") as mock_alert,
+        patch("backend.db.insert_ingest_ack") as mock_insert_ack,
     ):
         mock_insert.side_effect = lambda readings, buffer_id=None: _fake_rows(readings, buffer_id)
         mqtt_client.ingest_batch(batch)
@@ -225,6 +229,7 @@ def test_handle_buffer_publica_ack():
         patch("backend.db.get_buffer_readings", return_value=[]),
         patch("backend.db.insert_reading_batch") as mock_insert,
         patch("backend.db.get_threshold", return_value=None),
+        patch("backend.db.insert_ingest_ack") as mock_insert_ack,
         patch("backend.mqtt_client.publish_ack") as mock_publish,
     ):
         mock_insert.side_effect = lambda readings, buffer_id=None: _fake_rows(readings, buffer_id)
@@ -286,6 +291,7 @@ def test_post_readings_batch_devuelve_ack():
         patch("backend.db.get_buffer_readings", return_value=[]),
         patch("backend.db.insert_reading_batch") as mock_insert,
         patch("backend.db.get_threshold", return_value=None),
+        patch("backend.db.insert_ingest_ack") as mock_insert_ack,
         patch("backend.mqtt_client.publish_ack"),
         patch("backend.auth.get_user_by_username", return_value=_mock_db_user("administrador")),
     ):
@@ -312,6 +318,7 @@ def test_post_readings_batch_guarda_con_buffer_id():
         patch("backend.db.get_buffer_readings", return_value=[]),
         patch("backend.db.insert_reading_batch") as mock_insert,
         patch("backend.db.get_threshold", return_value=None),
+        patch("backend.db.insert_ingest_ack") as mock_insert_ack,
         patch("backend.mqtt_client.publish_ack"),
         patch("backend.auth.get_user_by_username", return_value=_mock_db_user("administrador")),
     ):
@@ -446,6 +453,7 @@ def test_auth_anonimo_acepta_sin_token():
         patch("backend.db.get_buffer_readings", return_value=[]),
         patch("backend.db.insert_reading_batch") as mock_insert,
         patch("backend.db.get_threshold", return_value=None),
+        patch("backend.db.insert_ingest_ack") as mock_insert_ack,
         patch("backend.mqtt_client.publish_ack"),
     ):
         mock_insert.side_effect = lambda readings, buffer_id=None: _fake_rows(readings, buffer_id)

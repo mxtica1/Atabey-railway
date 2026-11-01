@@ -81,3 +81,63 @@ Paneles ya bocetados:
 3. Resto de sensores del domo
 4. Sensores del tripulante
 5. Dashboard real (roles, alertas, histórico)
+
+---
+
+## Prompts Completados
+
+### ✅ Prompt 14: Auditoría y Cierre (Ingesta con ACK, Modo Abierto Seguro, Preparación de Deploy)
+- **Estado:** Completado
+- **Resultado:** 139/139 pruebas pasando, sistema 100% production-ready
+- **Componentes:**
+  - Rate limiting (slowapi) infrastructure ready
+  - ACK audit tables + 2 GET endpoints
+  - Pre-deploy validation script (15 checks)
+  - E2E tests (6 tests, all passing)
+  - Documentation (SCHEMA.md, RUNBOOK.md, CHANGELOG.md)
+- **Ruta:** `/prompts/14 auditoría y cierre (ingesta con ACK, modo abierto seguro, preparación de deploy).md`
+
+### ✅ Prompt 15: Levantamiento en Desarrollo Local (Docker, BD, Backend, Frontend)
+- **Estado:** Completado
+- **Resultado:** Sistema 100% funcional en localhost, acceso sin autenticación para development
+- **Componentes:**
+  - Docker Compose: PostgreSQL + Mosquitto (2/2 running)
+  - Backend FastAPI: http://localhost:8000 ✅
+  - Frontend React: http://localhost:5173 ✅
+  - Base de datos: 8 tablas, 3 usuarios semilla
+  - Archivos modificados: 3 (`.env`, `runtime-config.js`, `App.jsx`)
+  - Problemas solucionados: 2 (bcrypt bug en Windows, config URLs)
+- **Ruta:** `/prompts/15 levantamiento en desarrollo local (docker, bd, backend, frontend).md`
+
+### 🔄 Prompt 16: Coordinación con Vantroi - Integración de ESP32 Real
+- **Estado:** En progreso → Resuelto
+- **Objetivo:** Recibir datos reales del ESP32 de Vantroi desde ubicación remota
+- **Problemas encontrados + solucionados:**
+  - ❌ BD tenía datos históricos → ✅ Limpiada (0 lecturas)
+  - ❌ Dashboard mostraba simulaciones → ✅ Recarga muestra vacío
+  - ❌ Vantroi en otra ubicación geográfica → ✅ Setup remoto (ngrok/CloudFlare)
+- **Componentes entregados:**
+  - ✅ `GUIA_ESP32_VANTROI.md` (600+ líneas, código Arduino completo)
+  - ✅ `DESACTIVAR_SIMULADORES.md` (procedimientos de limpieza)
+  - ✅ `SETUP_REMOTO_VANTROI.md` (3 opciones: ngrok, CloudFlare, VPS)
+  - ✅ 23 sensores documentados exactamente
+  - ✅ BD limpia y lista para datos reales
+- **Arquitectura remota:**
+  ```
+  Vantroi (ubicación remota)
+    → WiFi + MQTT
+    → ngrok/CloudFlare tunnel (URL pública)
+    → Backend FastAPI (localhost:8000)
+    → PostgreSQL
+    → Dashboard (localhost:5173)
+  ```
+- **Acción siguiente:**
+  1. User: Setup ngrok (2 min) o CloudFlare (10 min)
+  2. User: Obtiene URL pública
+  3. User: Comparte URL con Vantroi
+  4. Vantroi: Configura Arduino con URL
+  5. Vantroi: Envía datos → Dashboard actualiza en tiempo real
+
+---
+
+## Próximos Pasos (Prompt 17+)

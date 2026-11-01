@@ -25,7 +25,7 @@
  *   }
  */
 window.__ATABEY_CONFIG__ = window.__ATABEY_CONFIG__ || {
-  apiBaseUrl: 'https://photographic-roulette-generating-priority.trycloudflare.com',
-  wsBaseUrl: 'wss://photographic-roulette-generating-priority.trycloudflare.com',
+  apiBaseUrl: 'http://localhost:8000',
+  wsBaseUrl: 'ws://localhost:8000',
   tileProvider: 'esri',
 };

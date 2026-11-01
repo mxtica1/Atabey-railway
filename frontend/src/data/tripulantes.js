@@ -27,26 +27,17 @@ export const TRIPULANTES = [
     id:           'T-01',
     nombre:       'Geisy Camilo',
     sexo:         'F',
-    streamSource: 'simulated',                  // lecturas generadas en navegador
+    streamSource: 'websocket',                 // ✅ Esperar datos del WebSocket (Vantroi)
     offset:       [-0.00020, -0.00010],
-    simulated: {
-      // Lecturas iniciales (se sobreescriben con random walk en Dashboard)
-      hr:   { value: 78,  unit: 'bpm' },
-      spo2: { value: 97,  unit: '%' },
-      btemp:{ value: 36.7, unit: '°C' },
-    },
+    simulated: null,  // ✅ SIN simulación
   },
   {
     id:           'T-02',
     nombre:       'Alba Vasquez',
     sexo:         'F',
-    streamSource: 'simulated',
+    streamSource: 'websocket',                 // ✅ Esperar datos del WebSocket (Vantroi)
     offset:       [ 0.00015,  0.00022],
-    simulated: {
-      hr:   { value: 82,  unit: 'bpm' },
-      spo2: { value: 98,  unit: '%' },
-      btemp:{ value: 36.9, unit: '°C' },
-    },
+    simulated: null,  // ✅ SIN simulación
   },
   {
     id:           'T-03',
@@ -60,13 +51,9 @@ export const TRIPULANTES = [
     id:           'T-04',
     nombre:       'Angel Peña',
     sexo:         'M',
-    streamSource: 'simulated',
+    streamSource: 'websocket',                 // ✅ Esperar datos del WebSocket (Vantroi)
     offset:       [ 0.00025, -0.00018],
-    simulated: {
-      hr:   { value: 70,  unit: 'bpm' },
-      spo2: { value: 96,  unit: '%' },
-      btemp:{ value: 36.6, unit: '°C' },
-    },
+    simulated: null,  // ✅ SIN simulación
   },
 ]
 

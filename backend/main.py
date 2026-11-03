@@ -109,7 +109,10 @@ async def lifespan(app: FastAPI):
         raise
     db.create_table()
     manager.set_loop(asyncio.get_running_loop())
-    mqtt_client.start()
+    try:
+        mqtt_client.start()
+    except RuntimeError as e:
+        logger.warning("⚠ MQTT no disponible (opcional): %s", e)
     HealthStatus().update_check()
     logger.info("✓ Backend Atabey iniciado correctamente")
     yield

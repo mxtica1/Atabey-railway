@@ -11,4 +11,7 @@ export default defineConfig({
     // excluirlo del optimizer es un respaldo que ademas acelera el dev server.
     exclude: ['maplibre-gl'],
   },
+  preview: {
+    allowedHosts: ['atabey-frontend.onrender.com', 'localhost'],
+  },
 })

@@ -50,6 +50,7 @@ from backend.models import (
     LocationPublic,
     ReadingBatch,
     SensorCatalogResponse,
+    SingleReading,
     Threshold,
     ThresholdUpdate,
     Token,
@@ -219,6 +220,40 @@ def ingest_reading_batch(batch: ReadingBatch):
         ack.buffer_id, ack.device_id, ack.accepted, ack.duplicates, ack.rejected,
     )
     return ack
+
+
+@app.post(
+    "/readings/single",
+    response_model=BatchAck,
+    summary="Recibe una lectura individual y devuelve ACK",
+)
+def ingest_single_reading(reading: SingleReading):
+    """
+    Endpoint para hardwares que envian UNA lectura a la vez (sin buffer).
+    
+    No requiere autenticacion. El servidor agrupa automaticamente la lectura
+    en un buffer de 1 elemento y devuelve el ACK completo.
+    
+    Util para microcontroladores con memoria limitada que no pueden agrupar
+    multiples lecturas en un array.
+    """
+    from uuid import uuid4
+    from backend.models import ReadingBatch
+    
+    # Envolver la lectura individual en un buffer
+    batch = ReadingBatch(
+        device_id=reading.device_id,
+        buffer_id=f"SINGLE-{uuid4().hex[:8]}",
+        readings=[reading],
+    )
+    
+    ack = mqtt_client.ingest_batch(batch)
+    mqtt_client.publish_ack(ack)
+    logger.info(
+        "ACK SINGLE %s: sensor=%s value=%.2f status=%s",
+        reading.device_id, reading.sensor_id, reading.value,
+        ack.items[0].status if ack.items else "unknown",
+    )
     return ack
 
 

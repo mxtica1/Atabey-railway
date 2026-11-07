@@ -24,6 +24,23 @@ class SensorReading(BaseModel):
     model_config = {"extra": "ignore"}  # campos extra en el JSON se ignoran
 
 
+class SingleReading(BaseModel):
+    """
+    Lectura individual simple — alternativa al buffer para hardwares
+    que no pueden agrupar multiples lecturas en un array.
+    
+    El servidor la envuelve automaticamente en un buffer de 1 elemento.
+    """
+    device_id: str
+    sensor_id: str
+    timestamp: datetime
+    value: float
+    unit: str
+    sequence: int
+
+    model_config = {"extra": "ignore"}
+
+
 # ── Buffer de datos + ACK ───────────────────────────────────────────────────
 #
 # Un "buffer" es un lote de lecturas que el ESP32/firmware acumula y envia

@@ -918,17 +918,15 @@ def get_reading_count() -> int:
 
 def truncate_readings() -> None:
     """
-    ⚠️ OPERACION DESTRUCTIVA: Elimina TODAS las lecturas y buffers de ingesta.
+    ⚠️ OPERACION DESTRUCTIVA: Elimina TODAS las lecturas.
     
     Se usa para limpiar datos de prueba. NO HAY UNDO.
     """
     sql_truncate_readings = "TRUNCATE TABLE readings CASCADE;"
-    sql_truncate_buffers = "TRUNCATE TABLE ingest_buffers CASCADE;"
     
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(sql_truncate_readings)
-            cur.execute(sql_truncate_buffers)
         conn.commit()
     
-    logger.warning("⚠️ CLEANUP: Se eliminaron TODAS las lecturas y buffers de ingesta")
+    logger.warning("⚠️ CLEANUP: Se eliminaron TODAS las lecturas")

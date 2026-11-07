@@ -25,7 +25,7 @@
  *   }
  */
 window.__ATABEY_CONFIG__ = window.__ATABEY_CONFIG__ || {
-  apiBaseUrl: 'http://localhost:8000',
-  wsBaseUrl: 'ws://localhost:8000',
+  apiBaseUrl: 'https://atabey-backend-k7kh.onrender.com',
+  wsBaseUrl: 'wss://atabey-backend-k7kh.onrender.com',
   tileProvider: 'esri',
 };

@@ -501,6 +501,7 @@ def health():
     """
     Health check con información de uptime y timestamp.
     Accesible sin autenticación.
+    Updated: 2026-11-06
     """
     status = HealthStatus()
     result = status.get_status()

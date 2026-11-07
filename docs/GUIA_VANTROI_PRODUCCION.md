@@ -43,21 +43,29 @@ Cada lectura de sensor sigue esta estructura exacta:
 ```json
 {
   "device_id": "ESP32-01",
-  "sensor_id": "TEMP-01",
-  "timestamp": "2026-11-06T20:15:00Z",
-  "value": 28.4,
-  "unit": "C",
-  "sequence": 1542
+  "buffer_id": "BUFFER-001",
+  "readings": [
+    {
+      "device_id": "ESP32-01",      ← Repetir device_id aquí también
+      "sensor_id": "TEMP-01",
+      "timestamp": "2026-11-06T20:15:00Z",
+      "value": 28.4,
+      "unit": "C",
+      "sequence": 1542
+    }
+  ]
 }
 ```
 
 **Campos:**
-- `device_id`: Identificador del ESP32 (ej. `ESP32-01`, `ESP32-02`)
-- `sensor_id`: Identificador del sensor (ej. `TEMP-01`, `HUMIDITY-01`, `PULSE-01`)
-- `timestamp`: Marca de tiempo en ISO 8601 UTC
-- `value`: Valor numérico de la lectura
-- `unit`: Unidad de medida (ej. `C`, `%`, `bpm`, `ppm`)
-- `sequence`: Contador incremental por sensor (para detectar lecturas perdidas)
+- `device_id`: Identificador del ESP32 (ej. `ESP32-01`, `ESP32-02`) — **aparece 2 veces**
+- `buffer_id`: ID único del lote (para detectar duplicados)
+- `readings`: Array de lecturas (mínimo 1)
+  - `sensor_id`: Identificador del sensor (ej. `TEMP-01`, `HUMIDITY-01`)
+  - `timestamp`: Marca de tiempo en ISO 8601 UTC
+  - `value`: Valor numérico de la lectura
+  - `unit`: Unidad de medida (ej. `C`, `%`, `bpm`, `ppm`)
+  - `sequence`: Contador incremental por sensor (para detectar lecturas perdidas)
 
 ---
 

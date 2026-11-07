@@ -33,6 +33,7 @@ void sendTelemetry() {
   
   JsonArray readings = doc.createNestedArray("readings");
   JsonObject reading = readings.createNestedObject();
+  reading["device_id"] = "ESP32-01";    // ⚠️ REPETIR device_id aquí también
   reading["sensor_id"] = "TEMP-01";
   reading["timestamp"] = "2026-11-06T20:15:00Z";
   reading["value"] = 25.5;
@@ -65,6 +66,7 @@ curl -X POST https://atabey-backend-k7kh.onrender.com/readings/batch \
     "buffer_id": "BUFFER-001",
     "readings": [
       {
+        "device_id": "ESP32-01",
         "sensor_id": "TEMP-01",
         "timestamp": "2026-11-06T20:15:00Z",
         "value": 25.5,
@@ -89,6 +91,7 @@ data = {
     "buffer_id": "BUFFER-001",
     "readings": [
         {
+            "device_id": "ESP32-01",  # ⚠️ Repetir aquí también
             "sensor_id": "TEMP-01",
             "timestamp": "2026-11-06T20:15:00Z",
             "value": 25.5,
@@ -112,6 +115,7 @@ const data = {
   buffer_id: 'BUFFER-001',
   readings: [
     {
+      device_id: 'ESP32-01',  // ⚠️ Repetir aquí también
       sensor_id: 'TEMP-01',
       timestamp: '2026-11-06T20:15:00Z',
       value: 25.5,
@@ -133,7 +137,7 @@ fetch(url, {
 
 ---
 
-## 📋 Estructura JSON Requerida
+## 📋 Estructura JSON Requerida ✅ CORREGIDA
 
 ```json
 {
@@ -141,6 +145,7 @@ fetch(url, {
   "buffer_id": "BUFFER-001",      // ID único del lote
   "readings": [                    // Array de lecturas
     {
+      "device_id": "ESP32-01",    // ⚠️ IMPORTANTE: repetir device_id aquí también
       "sensor_id": "TEMP-01",     // ID del sensor
       "timestamp": "2026-11-06T20:15:00Z",  // ISO 8601 UTC
       "value": 25.5,              // Valor numérico
@@ -150,6 +155,10 @@ fetch(url, {
   ]
 }
 ```
+
+**⚠️ NOTA CRÍTICA:** El `device_id` aparece **dos veces**:
+- Arriba en el buffer (nivel principal)
+- Dentro de cada lectura en `readings` (nivel de item)
 
 ---
 

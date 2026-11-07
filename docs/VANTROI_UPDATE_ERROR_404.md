@@ -78,7 +78,30 @@ El endpoint espera un **BUFFER** (lote), no un solo dato. Esto significa:
 
 ---
 
-## 📝 Ejemplo de Arduino (actualizado)
+## ⚠️ ESTRUCTURA JSON CORREGIDA
+
+**El error 422 anterior fue porque faltaba `device_id` dentro de cada lectura.**
+
+El JSON correcto es:
+
+```json
+{
+  "device_id": "ESP32-01",
+  "buffer_id": "BUFFER-001",
+  "readings": [
+    {
+      "device_id": "ESP32-01",    ← REPETIR device_id aquí
+      "sensor_id": "TEMP-01",
+      "timestamp": "2026-11-06T20:15:00Z",
+      "value": 25.5,
+      "unit": "C",
+      "sequence": 1
+    }
+  ]
+}
+```
+
+**Nota:** `device_id` aparece dos veces: en el nivel del buffer y dentro de cada lectura.
 
 ```cpp
 void sendDataToBackend(float tempValue) {

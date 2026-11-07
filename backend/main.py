@@ -494,6 +494,55 @@ def get_audit_changes(
     }
 
 
+# ── Admin: Limpieza de datos ──────────────────────────────────────────────────
+
+@app.delete(
+    "/admin/data/readings",
+    tags=["Admin"],
+    summary="Elimina todas las lecturas (limpieza de BD)",
+)
+def delete_all_readings(current_user: User = Depends(get_current_user)):
+    """
+    ⚠️ OPERACION DESTRUCTIVA: Elimina TODAS las lecturas de la BD.
+    
+    Solo disponible para administrador.
+    Se usa para limpiar datos de prueba antes de una operacion.
+    """
+    if current_user.rol != "administrador":
+        raise HTTPException(
+            status_code=403,
+            detail="Solo administradores pueden eliminar datos.",
+        )
+    
+    try:
+        # Contar antes
+        count_before = db.get_reading_count()
+        
+        # Limpiar
+        db.truncate_readings()
+        
+        # Contar después
+        count_after = db.get_reading_count()
+        
+        logger.warning(
+            "ADMIN CLEANUP: Usuario %s elimino %d lecturas",
+            current_user.username, count_before
+        )
+        
+        return {
+            "status": "ok",
+            "message": f"Se eliminaron {count_before} lecturas",
+            "readings_before": count_before,
+            "readings_after": count_after,
+        }
+    except Exception as e:
+        logger.error("Error durante limpieza: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Error durante limpieza de datos",
+        )
+
+
 # ── Health ────────────────────────────────────────────────────────────────────
 
 @app.get("/health", summary="Health check")

@@ -902,3 +902,33 @@ def get_audit_log(
                 cur.execute(sql, (limit,))
                 rows = cur.fetchall()
     return [dict(r) for r in rows]
+
+
+# ── Limpieza de Datos ─────────────────────────────────────────────────────────
+
+def get_reading_count() -> int:
+    """Devuelve el número total de lecturas en la BD."""
+    sql = "SELECT COUNT(*) as count FROM readings"
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(sql)
+            result = cur.fetchone()
+    return result['count'] if result else 0
+
+
+def truncate_readings() -> None:
+    """
+    ⚠️ OPERACION DESTRUCTIVA: Elimina TODAS las lecturas y buffers de ingesta.
+    
+    Se usa para limpiar datos de prueba. NO HAY UNDO.
+    """
+    sql_truncate_readings = "TRUNCATE TABLE readings CASCADE;"
+    sql_truncate_buffers = "TRUNCATE TABLE ingest_buffers CASCADE;"
+    
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql_truncate_readings)
+            cur.execute(sql_truncate_buffers)
+        conn.commit()
+    
+    logger.warning("⚠️ CLEANUP: Se eliminaron TODAS las lecturas y buffers de ingesta")

@@ -50,6 +50,7 @@ from backend.models import (
     LocationPublic,
     ReadingBatch,
     SensorCatalogResponse,
+    SensorReading,
     SingleReading,
     Threshold,
     ThresholdUpdate,
@@ -239,11 +240,21 @@ def ingest_single_reading(reading: SingleReading):
     """
     from uuid import uuid4
     
+    # Convertir SingleReading a SensorReading para el batch
+    sensor_reading = SensorReading(
+        device_id=reading.device_id,
+        sensor_id=reading.sensor_id,
+        timestamp=reading.timestamp,
+        value=reading.value,
+        unit=reading.unit,
+        sequence=reading.sequence,
+    )
+    
     # Envolver la lectura individual en un buffer
     batch = ReadingBatch(
         device_id=reading.device_id,
         buffer_id=f"SINGLE-{uuid4().hex[:8]}",
-        readings=[reading],
+        readings=[sensor_reading],
     )
     
     ack = mqtt_client.ingest_batch(batch)

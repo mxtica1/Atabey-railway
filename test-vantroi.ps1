@@ -44,7 +44,8 @@ foreach ($s in $sensors) {
             $success++
         }
     } catch {
-        Write-Host "[FAIL] $($s.sensor_id) - Error" -ForegroundColor Red
+        Write-Host "[FAIL] $($s.sensor_id) - Error: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "  Response: $($_.Exception.Response.StatusCode)" -ForegroundColor Red
         $fail++
     }
     

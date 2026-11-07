@@ -238,7 +238,6 @@ def ingest_single_reading(reading: SingleReading):
     multiples lecturas en un array.
     """
     from uuid import uuid4
-    from backend.models import ReadingBatch
     
     # Envolver la lectura individual en un buffer
     batch = ReadingBatch(

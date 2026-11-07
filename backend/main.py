@@ -6,7 +6,7 @@ Startup:
   2. Conecta al broker MQTT con suscripcion wildcard atabey/#.
 
 Endpoints publicos (sin autenticacion):
-  POST /api/ingest                 — ingesta abierta de datos (para ESP32 remoto)
+  POST /readings/batch             — ingesta de datos (buffer de lecturas)
   POST /auth/login                 — emite JWT con claim de rol
   GET  /health
 
@@ -193,61 +193,11 @@ async def websocket_endpoint(websocket: WebSocket, token: Optional[str] = Query(
 # ── API Abierta para Ingesta (sin autenticacion) ──────────────────────────────
 
 @app.post(
-    "/api/ingest",
-    response_model=BatchAck,
-    summary="Ingesta de datos abierta (sin autenticacion) para ESP32 remoto",
-)
-def ingest_reading_open(batch: ReadingBatch):
-    """
-    Endpoint ABIERTO para ingesta de telemetria desde ESP32 remoto (ej. Vantroi).
-    
-    NO requiere autenticacion ni token. Acepta un buffer de lecturas y devuelve
-    ACK de confirmacion. Usa la misma logica que /readings/batch pero sin
-    validar usuario.
-    
-    Nota: En produccion, considera agregar rate limiting o API key simple.
-    """
-    ack = mqtt_client.ingest_batch(batch)
-    mqtt_client.publish_ack(ack)
-    logger.info(
-        "ACK OPEN /api/ingest buffer %s (%s): %d aceptadas, %d duplicadas, %d rechazadas",
-        ack.buffer_id, ack.device_id, ack.accepted, ack.duplicates, ack.rejected,
-    )
-    return ack
-
-
-# ── Telemetria (cualquier rol autenticado) ────────────────────────────────────
-
-@app.get("/readings/latest", summary="Ultima lectura de un sensor")
-def get_latest_reading(
-    sensor_id: str = Query(..., description="ID del sensor, ej. TEMP-01"),
-    current_user: User = Depends(get_current_user),
-):
-    if sensor_id in BIOMETRIC_SENSORS and current_user.rol == "observador":
-        raise HTTPException(
-            status_code=403,
-            detail="Los datos biometricos son de acceso restringido.",
-        )
-    reading = db.get_latest_reading(sensor_id)
-    if reading is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No hay lecturas para sensor_id={sensor_id!r}",
-        )
-    return reading
-
-
-# ── Buffer de datos + ACK ────────────────────────────────────────────────────
-
-@app.post(
     "/readings/batch",
     response_model=BatchAck,
     summary="Recibe un buffer de datos y devuelve el ACK de confirmacion",
 )
-def ingest_reading_batch(
-    batch: ReadingBatch,
-    current_user: User = Depends(get_current_user),
-):
+def ingest_reading_batch(batch: ReadingBatch):
     """
     Recibe un BUFFER DE DATOS (lote de lecturas) del ESP32 / firmware.
 
@@ -258,6 +208,9 @@ def ingest_reading_batch(
 
     El mismo ACK se publica por MQTT en `atabey/ack/{device_id}` para que el
     emisor confirme la llegada sin depender de HTTP.
+    
+    NOTA: Este endpoint NO requiere autenticacion para permitir ingesta desde
+    ESP32 remoto (ej. Vantroi).
     """
     ack = mqtt_client.ingest_batch(batch)
     mqtt_client.publish_ack(ack)
@@ -265,6 +218,7 @@ def ingest_reading_batch(
         "ACK HTTP buffer %s (%s): %d aceptadas, %d duplicadas, %d rechazadas",
         ack.buffer_id, ack.device_id, ack.accepted, ack.duplicates, ack.rejected,
     )
+    return ack
     return ack
 
 

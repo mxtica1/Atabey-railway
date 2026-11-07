@@ -11,10 +11,10 @@
 Tu ESP32 debe enviar datos **aquí**:
 
 ```
-POST https://atabey-backend-k7kh.onrender.com/api/ingest
+POST https://atabey-backend-k7kh.onrender.com/readings/batch
 ```
 
-**NO** a la frontend (ese era el error #307 que recibiste).
+**SIN autenticación.** Solo envía el JSON y listo.
 
 ---
 
@@ -22,7 +22,7 @@ POST https://atabey-backend-k7kh.onrender.com/api/ingest
 
 ### URL ✅ CORREGIDA
 ```
-https://atabey-backend-k7kh.onrender.com/api/ingest
+https://atabey-backend-k7kh.onrender.com/readings/batch
 ```
 
 **NOTA IMPORTANTE:** Este endpoint NO requiere autenticacion ni token. Simplemente envía el JSON y listo.

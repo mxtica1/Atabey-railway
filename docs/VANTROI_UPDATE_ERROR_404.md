@@ -2,13 +2,13 @@
 
 **Fecha:** 6 Nov 2026, después del error #404  
 **Problema:** El endpoint `/api/ingest` no existía (error 404)  
-**Solución:** Acabo de crear el endpoint abierto sin requerer autenticación
+**Solución:** Quité la autenticación del endpoint `/readings/batch` existente
 
 ---
 
 ## 🔧 Qué cambió
 
-- **Nuevo endpoint:** `POST https://atabey-backend-k7kh.onrender.com/api/ingest`
+- **Endpoint:** `POST https://atabey-backend-k7kh.onrender.com/readings/batch`
 - **Sin autenticación:** No necesitas token, no necesitas login
 - **Mismo formato JSON:** Igual estructura que indicamos antes
 
@@ -19,7 +19,7 @@
 Usa **exactamente** este comando curl para verificar que funciona:
 
 ```bash
-curl -X POST https://atabey-backend-k7kh.onrender.com/api/ingest \
+curl -X POST https://atabey-backend-k7kh.onrender.com/readings/batch \
   -H "Content-Type: application/json" \
   -d '{
     "device_id": "ESP32-01",

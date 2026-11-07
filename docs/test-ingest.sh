@@ -7,7 +7,7 @@
 # para verificar que el endpoint esté funcionando.
 
 BACKEND_URL="https://atabey-backend-k7kh.onrender.com"
-INGEST_ENDPOINT="${BACKEND_URL}/api/ingest"
+INGEST_ENDPOINT="${BACKEND_URL}/readings/batch"
 
 echo "=========================================="
 echo "Atabey Telemetry — Test de Ingesta"

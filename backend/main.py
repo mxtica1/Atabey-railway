@@ -5,7 +5,8 @@ Startup:
   1. Crea tablas readings, users, thresholds, alerts y locations en PostgreSQL; seeds.
   2. Conecta al broker MQTT con suscripcion wildcard atabey/#.
 
-Endpoints publicos:
+Endpoints publicos (sin autenticacion):
+  POST /api/ingest                 — ingesta abierta de datos (para ESP32 remoto)
   POST /auth/login                 — emite JWT con claim de rol
   GET  /health
 
@@ -187,6 +188,32 @@ async def websocket_endpoint(websocket: WebSocket, token: Optional[str] = Query(
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
+
+# ── API Abierta para Ingesta (sin autenticacion) ──────────────────────────────
+
+@app.post(
+    "/api/ingest",
+    response_model=BatchAck,
+    summary="Ingesta de datos abierta (sin autenticacion) para ESP32 remoto",
+)
+def ingest_reading_open(batch: ReadingBatch):
+    """
+    Endpoint ABIERTO para ingesta de telemetria desde ESP32 remoto (ej. Vantroi).
+    
+    NO requiere autenticacion ni token. Acepta un buffer de lecturas y devuelve
+    ACK de confirmacion. Usa la misma logica que /readings/batch pero sin
+    validar usuario.
+    
+    Nota: En produccion, considera agregar rate limiting o API key simple.
+    """
+    ack = mqtt_client.ingest_batch(batch)
+    mqtt_client.publish_ack(ack)
+    logger.info(
+        "ACK OPEN /api/ingest buffer %s (%s): %d aceptadas, %d duplicadas, %d rechazadas",
+        ack.buffer_id, ack.device_id, ack.accepted, ack.duplicates, ack.rejected,
+    )
+    return ack
 
 
 # ── Telemetria (cualquier rol autenticado) ────────────────────────────────────

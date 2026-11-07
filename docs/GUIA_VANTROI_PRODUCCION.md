@@ -20,10 +20,12 @@ POST https://atabey-backend-k7kh.onrender.com/api/ingest
 
 ## 📋 Endpoint de Ingesta
 
-### URL
+### URL ✅ CORREGIDA
 ```
 https://atabey-backend-k7kh.onrender.com/api/ingest
 ```
+
+**NOTA IMPORTANTE:** Este endpoint NO requiere autenticacion ni token. Simplemente envía el JSON y listo.
 
 ### Método
 ```
